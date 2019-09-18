@@ -6,8 +6,8 @@ import (
 	"io"
 	"sort"
 
+	dot "github.com/kishansagathiya/go-dot"
 	peer "github.com/libp2p/go-libp2p-peer"
-	dot "github.com/zenground0/go-dot"
 
 	"github.com/ipfs/ipfs-cluster/api"
 )
@@ -31,8 +31,10 @@ import (
 type nodeType int
 
 const (
-	tCluster nodeType = iota // The cluster node type
-	tIpfs                    // The IPFS node type
+	tSelfCluster    nodeType = iota // The cluster self node type
+	tCluster                        // The cluster node type
+	tTrustedCluster                 // The trusted cluster node type
+	tIpfs                           // The IPFS node type
 )
 
 var errUnfinishedWrite = errors.New("could not complete write of line to output")
@@ -62,6 +64,8 @@ func makeDot(cg *api.ConnectGraph, w io.Writer, allIpfs bool) error {
 	dW := dotWriter{
 		w:                w,
 		dotGraph:         dot.NewGraph("cluster"),
+		self:             peer.IDB58Encode(cg.ClusterID),
+		trustMap:         cg.ClusterTrustLinks,
 		ipfsEdges:        ipfsEdges,
 		clusterEdges:     cg.ClusterLinks,
 		clusterIpfsEdges: cg.ClustertoIPFS,
@@ -78,30 +82,53 @@ type dotWriter struct {
 	w        io.Writer
 	dotGraph dot.Graph
 
+	self             string
+	trustMap         map[string]bool
 	ipfsEdges        map[string][]peer.ID
 	clusterEdges     map[string][]peer.ID
 	clusterIpfsEdges map[string]peer.ID
 }
 
+func (dW *dotWriter) addSubGraph(sGraph dot.Graph, rank string) {
+	sGraph.IsSubGraph = true
+	sGraph.Rank = rank
+	dW.dotGraph.AddSubGraph(&sGraph)
+}
+
 // writes nodes to dot file output and creates and stores an ordering over nodes
-func (dW *dotWriter) addNode(id string, nT nodeType) error {
-	var node dot.VertexDescription
-	pid, _ := peer.IDB58Decode(id)
-	node.Label = pid.ShortString()
+func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
+	node := dot.NewVertexDescription("")
+	node.Label = id[len(id)-5:] // use last five characters for the peer
 	switch nT {
+	case tSelfCluster:
+		node.Label = "Self"
+		node.ID = fmt.Sprint("S")
+		node.Color = "chartreuse4"
+		node.Style = "filled"
+		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
+		dW.clusterNodes[id] = &node
+	case tTrustedCluster:
+		node.ID = fmt.Sprintf("T%d", len(dW.clusterNodes))
+		node.Color = "chartreuse4"
+		node.Style = "filled"
+		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
+		dW.clusterNodes[id] = &node
 	case tCluster:
 		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
-		node.Color = "blue2"
+		node.Color = "chartreuse3"
+		node.Style = "filled"
+		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
 		dW.clusterNodes[id] = &node
 	case tIpfs:
 		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
 		node.Color = "goldenrod"
+		node.Group = id
 		dW.ipfsNodes[id] = &node
 	default:
 		return errUnknownNodeType
 	}
-	dW.dotGraph.AddVertex(&node)
 
+	graph.AddVertex(&node)
 	return nil
 }
 
@@ -109,22 +136,36 @@ func (dW *dotWriter) print() error {
 	dW.dotGraph.AddComment("The nodes of the connectivity graph")
 	dW.dotGraph.AddComment("The cluster-service peers")
 	// Write cluster nodes, use sorted order for consistent labels
+	sGraphCluster := dot.NewGraph("")
+	sGraphCluster.IsSubGraph = true
 	for _, k := range sortedKeys(dW.clusterEdges) {
-		err := dW.addNode(k, tCluster)
+		var err error
+		if k == dW.self {
+			err = dW.addNode(&sGraphCluster, k, tSelfCluster)
+		} else if dW.trustMap[k] {
+			err = dW.addNode(&sGraphCluster, k, tTrustedCluster)
+		} else {
+			err = dW.addNode(&sGraphCluster, k, tCluster)
+		}
 		if err != nil {
 			return err
 		}
 	}
+	dW.addSubGraph(sGraphCluster, "min")
 	dW.dotGraph.AddNewLine()
 
 	dW.dotGraph.AddComment("The ipfs peers")
+	sGraphIPFS := dot.NewGraph("")
+	sGraphIPFS.IsSubGraph = true
 	// Write ipfs nodes, use sorted order for consistent labels
 	for _, k := range sortedKeys(dW.ipfsEdges) {
-		err := dW.addNode(k, tIpfs)
+		err := dW.addNode(&sGraphIPFS, k, tIpfs)
 		if err != nil {
 			return err
 		}
 	}
+
+	dW.addSubGraph(sGraphIPFS, "max")
 	dW.dotGraph.AddNewLine()
 
 	dW.dotGraph.AddComment("Edges representing active connections in the cluster")
@@ -157,7 +198,7 @@ func (dW *dotWriter) print() error {
 			dW.dotGraph.AddEdge(toNode, fromNode, true)
 		}
 	}
-	return dW.dotGraph.WriteDot(dW.w)
+	return dW.dotGraph.Write(dW.w)
 }
 
 func sortedKeys(dict map[string][]peer.ID) []string {

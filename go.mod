@@ -47,6 +47,7 @@ require (
 	github.com/ipfs/go-path v0.0.7
 	github.com/ipfs/go-unixfs v0.2.1
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/kishansagathiya/go-dot v0.0.0-20190921051334-85e4b2146bb3
 	github.com/lanzafame/go-libp2p-ocgorpc v0.1.1
 	github.com/libp2p/go-libp2p v0.3.1
 	github.com/libp2p/go-libp2p-blankhost v0.1.4 // indirect
@@ -70,8 +71,6 @@ require (
 	github.com/libp2p/go-ws-transport v0.1.0
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/miekg/dns v1.1.16 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/multiformats/go-multiaddr v0.0.4
 	github.com/multiformats/go-multiaddr-dns v0.0.3
 	github.com/multiformats/go-multiaddr-net v0.0.1
@@ -91,7 +90,6 @@ require (
 	github.com/ugorji/go/codec v1.1.7
 	github.com/urfave/cli v1.20.0
 	github.com/whyrusleeping/mdns v0.0.0-20190826153040-b9b60ed33aa9 // indirect
-	github.com/zenground0/go-dot v0.0.0-20180912213407-94a425d4984e
 	go.opencensus.io v0.22.0
 	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
 	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect

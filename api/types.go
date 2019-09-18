@@ -294,6 +294,8 @@ type ConnectGraph struct {
 	IPFSLinks map[string][]peer.ID `json:"ipfs_links" codec:"il,omitempty"`
 	// cluster to cluster links
 	ClusterLinks map[string][]peer.ID `json:"cluster_links" codec:"cl,omitempty"`
+	// cluster trust links
+	ClusterTrustLinks map[string]bool `json:"cluster_trust_links" codec:"ctl,omitempty"`
 	// cluster to ipfs links
 	ClustertoIPFS map[string]peer.ID `json:"cluster_to_ipfs" codec:"ci,omitempty"`
 }
