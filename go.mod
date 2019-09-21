@@ -47,7 +47,7 @@ require (
 	github.com/ipfs/go-path v0.0.7
 	github.com/ipfs/go-unixfs v0.2.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kishansagathiya/go-dot v0.0.0-20190921051334-85e4b2146bb3
+	github.com/kishansagathiya/go-dot v0.0.1
 	github.com/lanzafame/go-libp2p-ocgorpc v0.1.1
 	github.com/libp2p/go-libp2p v0.3.1
 	github.com/libp2p/go-libp2p-blankhost v0.1.4 // indirect
