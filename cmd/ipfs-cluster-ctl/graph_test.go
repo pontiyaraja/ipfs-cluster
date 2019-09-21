@@ -131,53 +131,57 @@ func TestSimpleIpfsGraphs(t *testing.T) {
 }
 
 var allIpfs = `digraph cluster {
-
 /* The nodes of the connectivity graph */
 /* The cluster-service peers */
-C0 [label="<peer.ID Qm*eqhEhD>" color="blue2"]
-C1 [label="<peer.ID Qm*cgHDQJ>" color="blue2"]
-C2 [label="<peer.ID Qm*6MQmJu>" color="blue2"]
+subgraph  {
+rank="min"
+C0 [label="Self" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="chartreuse4" style="filled" ]
+C1 [label="gHDQJ" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="chartreuse3" style="filled" ]
+C2 [label="MQmJu" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="chartreuse3" style="filled" ]
+}
 
 /* The ipfs peers */
-I0 [label="<peer.ID Qm*N5LSsq>" color="goldenrod"]
-I1 [label="<peer.ID Qm*S8xccb>" color="goldenrod"]
-I2 [label="<peer.ID Qm*aaanM8>" color="goldenrod"]
-I3 [label="<peer.ID Qm*R3DZDV>" color="goldenrod"]
-I4 [label="<peer.ID Qm*wbBsuL>" color="goldenrod"]
-I5 [label="<peer.ID Qm*tWZdeD>" color="goldenrod"]
+subgraph  {
+rank="max"
+I0 [label="5LSsq" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="goldenrod" ]
+I1 [label="8xccb" group="QmQsdAdCHs4PRLi5tcoLfasYppryqQENxgAy4b2aS8xccb" color="goldenrod" ]
+I2 [label="aanM8" group="QmVV2enwXqqQf5esx4v36UeaFQvFehSPzNfi8aaaaaanM8" color="goldenrod" ]
+I3 [label="3DZDV" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="goldenrod" ]
+I4 [label="bBsuL" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="goldenrod" ]
+I5 [label="WZdeD" group="QmfCHNQ2vbUmAuJZhE2hEpgiJq4sL1XScWEKnUrVtWZdeD" color="goldenrod" ]
+}
 
 /* Edges representing active connections in the cluster */
 /* The connections among cluster-service peers */
-C2 -> C0
-C2 -> C1
 C0 -> C1
 C0 -> C2
 C1 -> C0
 C1 -> C2
+C2 -> C0
+C2 -> C1
 
 /* The connections between cluster peers and their ipfs daemons */
+C2 -> I4
 C0 -> I3
 C1 -> I0
-C2 -> I4
 
 /* The swarm peer connections among ipfs daemons in the cluster */
-I0 -> I1
-I0 -> I2
-I0 -> I3
-I0 -> I4
-I0 -> I5
-I3 -> I0
-I3 -> I1
-I3 -> I2
-I3 -> I4
-I3 -> I5
+I4 -> I3
 I4 -> I0
 I4 -> I1
 I4 -> I2
-I4 -> I3
 I4 -> I5
-
- }`
+I3 -> I0
+I3 -> I4
+I3 -> I1
+I3 -> I2
+I3 -> I5
+I0 -> I3
+I0 -> I4
+I0 -> I1
+I0 -> I2
+I0 -> I5
+}`
 
 func TestIpfsAllGraphs(t *testing.T) {
 	cg := api.ConnectGraph{
