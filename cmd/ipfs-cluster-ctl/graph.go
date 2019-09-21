@@ -102,7 +102,7 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 	switch nT {
 	case tSelfCluster:
 		node.Label = "Self"
-		node.ID = fmt.Sprint("S")
+		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
 		node.Color = "chartreuse4"
 		node.Style = "filled"
 		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
