@@ -37,16 +37,16 @@ var simpleIpfs = `digraph cluster {
 subgraph  {
 rank="min"
 C0 [label="Self" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="chartreuse4" style="filled" ]
-C1 [label="gHDQJ" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="chartreuse3" style="filled" ]
-C2 [label="MQmJu" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="chartreuse3" style="filled" ]
+C1 [label="Qm*DQJ" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="chartreuse3" style="filled" ]
+C2 [label="Qm*mJu" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="chartreuse3" style="filled" ]
 }
 
 /* The ipfs peers */
 subgraph  {
 rank="max"
-I0 [label="5LSsq" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="goldenrod" ]
-I1 [label="3DZDV" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="goldenrod" ]
-I2 [label="bBsuL" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="goldenrod" ]
+I0 [label="IPFS: Qm*Ssq" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="goldenrod" ]
+I1 [label="IPFS: Qm*ZDV" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="goldenrod" ]
+I2 [label="IPFS: Qm*suL" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="goldenrod" ]
 }
 
 /* Edges representing active connections in the cluster */
@@ -136,19 +136,19 @@ var allIpfs = `digraph cluster {
 subgraph  {
 rank="min"
 C0 [label="Self" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="chartreuse4" style="filled" ]
-C1 [label="gHDQJ" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="chartreuse3" style="filled" ]
-C2 [label="MQmJu" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="chartreuse3" style="filled" ]
+C1 [label="Qm*DQJ" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="chartreuse3" style="filled" ]
+C2 [label="Qm*mJu" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="chartreuse3" style="filled" ]
 }
 
 /* The ipfs peers */
 subgraph  {
 rank="max"
-I0 [label="5LSsq" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="goldenrod" ]
-I1 [label="8xccb" group="QmQsdAdCHs4PRLi5tcoLfasYppryqQENxgAy4b2aS8xccb" color="goldenrod" ]
-I2 [label="aanM8" group="QmVV2enwXqqQf5esx4v36UeaFQvFehSPzNfi8aaaaaanM8" color="goldenrod" ]
-I3 [label="3DZDV" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="goldenrod" ]
-I4 [label="bBsuL" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="goldenrod" ]
-I5 [label="WZdeD" group="QmfCHNQ2vbUmAuJZhE2hEpgiJq4sL1XScWEKnUrVtWZdeD" color="goldenrod" ]
+I0 [label="IPFS: Qm*Ssq" group="QmPFKAGZbUjdzt8BBx8VTWCe9UeUQVcoqHFehSPzN5LSsq" color="goldenrod" ]
+I1 [label="IPFS: Qm*ccb" group="QmQsdAdCHs4PRLi5tcoLfasYppryqQENxgAy4b2aS8xccb" color="goldenrod" ]
+I2 [label="IPFS: Qm*nM8" group="QmVV2enwXqqQf5esx4v36UeaFQvFehSPzNfi8aaaaaanM8" color="goldenrod" ]
+I3 [label="IPFS: Qm*ZDV" group="QmXbiVZd93SLiu9TAm21F2y9JwGiFLydbEVkPBaMR3DZDV" color="goldenrod" ]
+I4 [label="IPFS: Qm*suL" group="QmbU7273zH6jxwDe2nqRmEm2rp5PpqP2xeQr2xCmwbBsuL" color="goldenrod" ]
+I5 [label="IPFS: Qm*deD" group="QmfCHNQ2vbUmAuJZhE2hEpgiJq4sL1XScWEKnUrVtWZdeD" color="goldenrod" ]
 }
 
 /* Edges representing active connections in the cluster */

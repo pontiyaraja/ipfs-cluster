@@ -17,6 +17,7 @@ func (c *Cluster) ConnectGraph() (api.ConnectGraph, error) {
 
 	cg := api.ConnectGraph{
 		ClusterID:         c.host.ID(),
+		IDtoPeername:      make(map[string]string),
 		IPFSLinks:         make(map[string][]peer.ID),
 		ClusterLinks:      make(map[string][]peer.ID),
 		ClusterTrustLinks: make(map[string]bool),
@@ -55,7 +56,7 @@ func (c *Cluster) ConnectGraph() (api.ConnectGraph, error) {
 		}
 
 		selfConnection, pID := c.recordClusterLinks(&cg, p, peers[i])
-
+		cg.IDtoPeername[p] = pID.Peername
 		// IPFS connections
 		if !selfConnection {
 			logger.Warningf("cluster peer %s not its own peer.  No ipfs info ", p)

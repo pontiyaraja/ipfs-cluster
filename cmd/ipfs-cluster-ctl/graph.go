@@ -83,6 +83,7 @@ type dotWriter struct {
 	dotGraph dot.Graph
 
 	self             string
+	idToPeername     map[string]string
 	trustMap         map[string]bool
 	ipfsEdges        map[string][]peer.ID
 	clusterEdges     map[string][]peer.ID
@@ -98,7 +99,6 @@ func (dW *dotWriter) addSubGraph(sGraph dot.Graph, rank string) {
 // writes nodes to dot file output and creates and stores an ordering over nodes
 func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 	node := dot.NewVertexDescription("")
-	node.Label = id[len(id)-5:] // use last five characters for the peer
 	switch nT {
 	case tSelfCluster:
 		node.Label = "Self"
@@ -108,18 +108,21 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
 		dW.clusterNodes[id] = &node
 	case tTrustedCluster:
+		node.Label = getClusterLabel(dW.idToPeername, id)
 		node.ID = fmt.Sprintf("T%d", len(dW.clusterNodes))
 		node.Color = "chartreuse4"
 		node.Style = "filled"
 		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
 		dW.clusterNodes[id] = &node
 	case tCluster:
+		node.Label = getClusterLabel(dW.idToPeername, id)
 		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
 		node.Color = "chartreuse3"
 		node.Style = "filled"
 		node.Group = peer.IDB58Encode(dW.clusterIpfsEdges[id])
 		dW.clusterNodes[id] = &node
 	case tIpfs:
+		node.Label = "IPFS: " + id[:2] + "*" + id[len(id)-3:]
 		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
 		node.Color = "goldenrod"
 		node.Group = id
@@ -130,6 +133,13 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 
 	graph.AddVertex(&node)
 	return nil
+}
+
+func getClusterLabel(idToPeername map[string]string, id string) string {
+	if peername := idToPeername[id]; peername != "" {
+		return peername
+	}
+	return id[:2] + "*" + id[len(id)-3:]
 }
 
 func (dW *dotWriter) print() error {
