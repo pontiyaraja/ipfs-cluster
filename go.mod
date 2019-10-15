@@ -48,7 +48,7 @@ require (
 	github.com/ipfs/go-path v0.0.7
 	github.com/ipfs/go-unixfs v0.2.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kishansagathiya/go-dot v0.0.1
+	github.com/kishansagathiya/go-dot v0.0.2-0.20191013111036-f1da912e6fcb
 	github.com/lanzafame/go-libp2p-ocgorpc v0.1.1
 	github.com/libp2p/go-libp2p v0.3.1
 	github.com/libp2p/go-libp2p-blankhost v0.1.4 // indirect
@@ -72,6 +72,8 @@ require (
 	github.com/libp2p/go-ws-transport v0.1.0
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/miekg/dns v1.1.17 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/multiformats/go-multiaddr v0.0.4
 	github.com/multiformats/go-multiaddr-dns v0.0.3
 	github.com/multiformats/go-multiaddr-net v0.0.1
