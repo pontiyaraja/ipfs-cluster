@@ -105,12 +105,12 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 	node.ColorScheme = "brbg11"
 	node.FontName = "Ariel"
 	node.Shape = "ellipse"
+	node.Style = "filled"
 	switch nT {
 	case tSelfCluster:
 		node.Label = label(dW.idToPeername[id], shorten(id))
 		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
 		node.Color = "11"
-		node.Style = "filled"
 		node.Peripheries = 2
 		node.FontColor = "6"
 		dW.clusterNodes[id] = &node
@@ -118,29 +118,27 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 		node.Label = label(dW.idToPeername[id], shorten(id))
 		node.ID = fmt.Sprintf("T%d", len(dW.clusterNodes))
 		node.Color = "11"
-		node.Style = "filled"
 		node.FontColor = "6"
 		dW.clusterNodes[id] = &node
 	case tCluster:
 		node.Label = label(dW.idToPeername[id], shorten(id))
 		node.ID = fmt.Sprintf("C%d", len(dW.clusterNodes))
 		node.Color = "9"
-		node.Style = "filled"
 		node.FontColor = "6"
 		dW.clusterNodes[id] = &node
 	case tIPFS:
 		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
+		node.Shape = "box"
 		ipfsID, ok := dW.clusterIpfsEdges[id]
 		if !ok {
 			node.Label = label("IPFS", "Errored")
-			node.Color = "3"
-			node.FontColor = "1"
-			node.Shape = "box"
+			node.ColorScheme = "X11"
+			node.Color = "orangered"
+			node.FontColor = "white"
 			dW.ipfsNodes[id] = &node
 		} else {
 			ipfsIDStr := peer.IDB58Encode(ipfsID)
 			node.Label = label("IPFS", shorten(ipfsIDStr))
-			node.Style = "filled"
 			node.Color = "1"
 			node.FontColor = "6"
 			dW.ipfsNodes[ipfsIDStr] = &node
@@ -150,9 +148,9 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 		if ok {
 			return nil
 		}
+		node.Shape = "box"
 		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
 		node.Label = label("IPFS", shorten(id))
-		node.Style = "filled"
 		node.Color = "5"
 		node.FontColor = "1"
 		dW.ipfsNodes[id] = &node
