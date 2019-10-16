@@ -36,17 +36,17 @@ var simpleIpfs = `digraph cluster {
 /* The cluster-service peers */
 subgraph  {
 rank="min"
-C0 [label=< <B>  </B> <BR/> <B> Qm*EhD </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="11" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" peripheries="2" ]
-C1 [label=< <B>  </B> <BR/> <B> Qm*DQJ </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
-C2 [label=< <B>  </B> <BR/> <B> Qm*mJu </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
+C0 [label=< <B>  </B> <BR/> <B> Qm*EhD </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="11" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" peripheries="2" ]
+C1 [label=< <B>  </B> <BR/> <B> Qm*DQJ </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
+C2 [label=< <B>  </B> <BR/> <B> Qm*mJu </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
 }
 
 /* The ipfs peers linked to cluster peers */
 subgraph  {
 rank="max"
-I0 [label=< <B> IPFS </B> <BR/> <B> Qm*ZDV </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
-I1 [label=< <B> IPFS </B> <BR/> <B> Qm*Ssq </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
-I2 [label=< <B> IPFS </B> <BR/> <B> Qm*suL </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
+I0 [label=< <B> IPFS </B> <BR/> <B> Qm*ZDV </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
+I1 [label=< <B> IPFS </B> <BR/> <B> Qm*Ssq </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
+I2 [label=< <B> IPFS </B> <BR/> <B> Qm*suL </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
 }
 
 /* The ipfs swarm peers */
@@ -137,23 +137,23 @@ var allIpfs = `digraph cluster {
 /* The cluster-service peers */
 subgraph  {
 rank="min"
-C0 [label=< <B>  </B> <BR/> <B> Qm*EhD </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="11" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" peripheries="2" ]
-C1 [label=< <B>  </B> <BR/> <B> Qm*DQJ </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
-C2 [label=< <B>  </B> <BR/> <B> Qm*mJu </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
+C0 [label=< <B>  </B> <BR/> <B> Qm*EhD </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="11" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" peripheries="2" ]
+C1 [label=< <B>  </B> <BR/> <B> Qm*DQJ </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
+C2 [label=< <B>  </B> <BR/> <B> Qm*mJu </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="9" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
 }
 
 /* The ipfs peers linked to cluster peers */
 subgraph  {
 rank="max"
-I0 [label=< <B> IPFS </B> <BR/> <B> Qm*ZDV </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
-I1 [label=< <B> IPFS </B> <BR/> <B> Qm*Ssq </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
-I2 [label=< <B> IPFS </B> <BR/> <B> Qm*suL </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" ]
+I0 [label=< <B> IPFS </B> <BR/> <B> Qm*ZDV </B> > group="QmUBuxVHoNNjfmNpTad36UeaFQv3gXAtCv9r6KhmeqhEhD" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
+I1 [label=< <B> IPFS </B> <BR/> <B> Qm*Ssq </B> > group="QmV35LjbEGPfN7KfMAJp43VV2enwXqqQf5esx4vUcgHDQJ" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
+I2 [label=< <B> IPFS </B> <BR/> <B> Qm*suL </B> > group="QmZ2ckU7G35MYyJgMTwMUnicsGqSy3YUxGBX7qny6MQmJu" color="1" style="filled" colorscheme="brbg11" fontcolor="6" fontname="Ariel" shape="ellipse" ]
 }
 
 /* The ipfs swarm peers */
-I3 [label=< <B> IPFS </B> <BR/> <B> Qm*ccb </B> > group="QmQsdAdCHs4PRLi5tcoLfasYppryqQENxgAy4b2aS8xccb" color="5" style="filled" colorscheme="brbg11" fontcolor="1" fontname="Ariel" ]
-I4 [label=< <B> IPFS </B> <BR/> <B> Qm*nM8 </B> > group="QmVV2enwXqqQf5esx4v36UeaFQvFehSPzNfi8aaaaaanM8" color="5" style="filled" colorscheme="brbg11" fontcolor="1" fontname="Ariel" ]
-I5 [label=< <B> IPFS </B> <BR/> <B> Qm*deD </B> > group="QmfCHNQ2vbUmAuJZhE2hEpgiJq4sL1XScWEKnUrVtWZdeD" color="5" style="filled" colorscheme="brbg11" fontcolor="1" fontname="Ariel" ]
+I3 [label=< <B> IPFS </B> <BR/> <B> Qm*ccb </B> > group="QmQsdAdCHs4PRLi5tcoLfasYppryqQENxgAy4b2aS8xccb" color="5" style="filled" colorscheme="brbg11" fontcolor="1" fontname="Ariel" shape="ellipse" ]
+I4 [label=< <B> IPFS </B> <BR/> <B> Qm*nM8 </B> > group="QmVV2enwXqqQf5esx4v36UeaFQvFehSPzNfi8aaaaaanM8" color="5" style="filled" colorscheme="brbg11" fontcolor="1" fontname="Ariel" shape="ellipse" ]
+I5 [label=< <B> IPFS </B> <BR/> <B> Qm*deD </B> > group="QmfCHNQ2vbUmAuJZhE2hEpgiJq4sL1XScWEKnUrVtWZdeD" color="5" style="filled" colorscheme="brbg11" fontcolor="1" fontname="Ariel" shape="ellipse" ]
 
 /* Edges representing active connections in the cluster */
 /* The connections among cluster-service peers */

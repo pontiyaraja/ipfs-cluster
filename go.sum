@@ -365,6 +365,8 @@ github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dv
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/kishansagathiya/go-dot v0.0.2-0.20191013111036-f1da912e6fcb h1:K72Zy5/WevkrSEK9R9lyGowoEol8UsoSIWbfEtp0HeY=
 github.com/kishansagathiya/go-dot v0.0.2-0.20191013111036-f1da912e6fcb/go.mod h1:U1dCUFzZ+KnBgkaCWPj2JFUQygVepVudkINK9QRsxMs=
+github.com/kishansagathiya/go-dot v0.0.2-0.20191016070847-1c5b432788b0 h1:PaBS3DH0aJ7E7+YZevHQGyElNOEwZW7Q5ljITIBDA88=
+github.com/kishansagathiya/go-dot v0.0.2-0.20191016070847-1c5b432788b0/go.mod h1:U1dCUFzZ+KnBgkaCWPj2JFUQygVepVudkINK9QRsxMs=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/gotool v1.0.0 h1:AV2c/EiW3KqPNT9ZKl07ehoAGi4C5/01Cfbblndcapg=

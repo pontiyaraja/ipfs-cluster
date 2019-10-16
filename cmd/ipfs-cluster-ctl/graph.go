@@ -104,6 +104,7 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 	node.Group = id
 	node.ColorScheme = "brbg11"
 	node.FontName = "Ariel"
+	node.Shape = "ellipse"
 	switch nT {
 	case tSelfCluster:
 		node.Label = label(dW.idToPeername[id], shorten(id))
@@ -134,6 +135,7 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 			node.Label = label("IPFS", "Errored")
 			node.Color = "3"
 			node.FontColor = "1"
+			node.Shape = "box"
 			dW.ipfsNodes[id] = &node
 		} else {
 			ipfsIDStr := peer.IDB58Encode(ipfsID)
