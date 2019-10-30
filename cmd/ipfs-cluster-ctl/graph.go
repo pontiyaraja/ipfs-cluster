@@ -35,7 +35,6 @@ const (
 	tCluster                        //  cluster node
 	tTrustedCluster                 //  trusted cluster node
 	tIPFS                           //  IPFS node linked to a Cluster node
-	tSwarmIPFS                      //  IPFS node linked to a tIPFS node
 )
 
 var errUnfinishedWrite = errors.New("could not complete write of line to output")
@@ -143,17 +142,6 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 			node.FontColor = "6"
 			dW.ipfsNodes[ipfsIDStr] = &node
 		}
-	case tSwarmIPFS:
-		_, ok := dW.ipfsNodes[id]
-		if ok {
-			return nil
-		}
-		node.Shape = "box"
-		node.ID = fmt.Sprintf("I%d", len(dW.ipfsNodes))
-		node.Label = label("IPFS", shorten(id))
-		node.Color = "5"
-		node.FontColor = "1"
-		dW.ipfsNodes[id] = &node
 	default:
 		return errUnknownNodeType
 	}
@@ -163,8 +151,9 @@ func (dW *dotWriter) addNode(graph *dot.Graph, id string, nT nodeType) error {
 }
 
 func shorten(id string) string {
-	return id[:2] + "*" + id[len(id)-3:]
+	return id[:2] + "*" + id[len(id)-6:]
 }
+
 func label(peername, id string) string {
 	return fmt.Sprintf("< <B> %s </B> <BR/> <B> %s </B> >", peername, id)
 }
@@ -202,20 +191,6 @@ func (dW *dotWriter) print() error {
 		}
 	}
 	dW.addSubGraph(sGraphIPFS, "max")
-	dW.dotGraph.AddNewLine()
-
-	dW.dotGraph.AddComment("The ipfs swarm peers")
-	for _, k := range sortedKeys(dW.ipfsEdges) {
-		v := dW.ipfsEdges[k]
-		for _, id := range v {
-			idStr := peer.IDB58Encode(id)
-			_, ok := dW.ipfsNodes[idStr]
-			if ok {
-				continue
-			}
-			dW.addNode(&dW.dotGraph, idStr, tSwarmIPFS)
-		}
-	}
 	dW.dotGraph.AddNewLine()
 
 	dW.dotGraph.AddComment("Edges representing active connections in the cluster")
