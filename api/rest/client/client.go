@@ -30,7 +30,7 @@ import (
 // Configuration defaults
 var (
 	DefaultTimeout   = 0
-	DefaultAPIAddr   = "/ip4/127.0.0.1/tcp/9094"
+	DefaultAPIAddr   = "/ip4/0.0.0.0/tcp/9094"
 	DefaultLogLevel  = "info"
 	DefaultProxyPort = 9095
 	ResolveTimeout   = 30 * time.Second

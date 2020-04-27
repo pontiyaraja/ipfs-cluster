@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/ipfs/ipfs-cluster/api"
 	"github.com/ipfs/ipfs-cluster/api/rest/client"
+	"github.com/ipfs/ipfs-cluster/cmdutils"
 
 	cid "github.com/ipfs/go-cid"
 	logging "github.com/ipfs/go-log"
@@ -31,8 +33,22 @@ const programName = `ipfs-cluster-ctl`
 // the IPFS cluster's version
 const Version = "0.12.0"
 
+// Default location for the configurations and data
 var (
-	defaultHost          = "/ip4/127.0.0.1/tcp/9094"
+	DefaultPath string
+	// The name of the configuration file inside DefaultPath
+	DefaultConfigFile = "service.json"
+	// The name of the identity file inside DefaultPath
+	DefaultIdentityFile = "identity.json"
+)
+
+var (
+	configPath   string
+	identityPath string
+)
+
+var (
+	defaultHost          = "/ip4/0.0.0.0/tcp/9094"
 	defaultTimeout       = 0
 	defaultUsername      = ""
 	defaultPassword      = ""
@@ -210,6 +226,28 @@ This command displays information about the peer that the tool is contacting
 			Action: func(c *cli.Context) error {
 				resp, cerr := globalClient.ID(ctx)
 				formatResponse(c, resp, cerr)
+				absPath, err := filepath.Abs(c.String("config"))
+				if err != nil {
+					return err
+				}
+
+				configPath = filepath.Join(absPath, DefaultConfigFile)
+				identityPath = filepath.Join(absPath, DefaultIdentityFile)
+
+				cfgHelper := cmdutils.NewConfigHelper(configPath, identityPath, "")
+				defer cfgHelper.Manager().Shutdown() // wait for saves
+
+				logger.Debug("config key ------------------   ", cfgHelper.Identity().ConfigKey())
+
+				logger.Debug("Current secret ================== >   ", string(cfgHelper.Configs().Cluster.Secret))
+
+				if _, err := os.Stat(configPath); !os.IsNotExist(err) {
+					checkErr("reading config filr ", err)
+				}
+				logger.Debug("Current secret ================== >   ", string(cfgHelper.Configs().Cluster.Secret))
+				cfgHelper.Configs().Cluster.Secret = []byte("1231434fafdsfgsdfggsgs")
+				checkErr("updating secret", cfgHelper.SaveConfigToDisk())
+
 				return nil
 			},
 		},

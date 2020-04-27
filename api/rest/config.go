@@ -27,7 +27,7 @@ const minMaxHeaderBytes = 4096
 
 // These are the default values for Config
 const (
-	DefaultHTTPListenAddr    = "/ip4/127.0.0.1/tcp/9094"
+	DefaultHTTPListenAddr    = "/ip4/0.0.0.0/tcp/9094"
 	DefaultReadTimeout       = 0
 	DefaultReadHeaderTimeout = 5 * time.Second
 	DefaultWriteTimeout      = 0
