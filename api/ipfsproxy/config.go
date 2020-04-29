@@ -21,8 +21,8 @@ const (
 
 // Default values for Config.
 const (
-	DefaultListenAddr         = "/ip4/127.0.0.1/tcp/9095"
-	DefaultNodeAddr           = "/ip4/127.0.0.1/tcp/5001"
+	DefaultListenAddr         = "/ip4/0.0.0.0/tcp/9095"
+	DefaultNodeAddr           = "/ip4/0.0.0.0/tcp/5001"
 	DefaultNodeHTTPS          = false
 	DefaultReadTimeout        = 0
 	DefaultReadHeaderTimeout  = 5 * time.Second
