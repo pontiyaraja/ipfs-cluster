@@ -8,12 +8,14 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
@@ -76,6 +78,8 @@ const autoStatus = -1
 // For making a random sharding ID
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
+const URL = "http://138.197.160.170:2048/user/getKey"
+
 // API implements an API and aims to provides
 // a RESTful HTTP API for Cluster.
 type API struct {
@@ -111,6 +115,16 @@ type peerAddBody struct {
 }
 
 type logWriter struct {
+}
+
+type axillaryInput struct {
+	Nonce     string `json:"_nonce"`
+	Signature string `json:"_userSignature"`
+}
+
+type CipherResponse struct {
+	WalletAddress string `json:"_userAddress"`
+	CiperText     string `json:"_userKey"`
 }
 
 func (lw logWriter) Write(b []byte) (int, error) {
@@ -305,38 +319,64 @@ func (api *API) addRoutes(router *mux.Router) {
 
 // basicAuth wraps a given handler with basic authentication
 func basicAuthHandler(credentials map[string]string, h http.Handler) http.Handler {
-	if credentials == nil {
-		return h
-	}
+	// if credentials == nil {
+	// 	return h
+	// }
 
 	wrap := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-		username, password, ok := r.BasicAuth()
-		if !ok {
-			resp, err := unauthorizedResp()
-			if err != nil {
-				logger.Error(err)
-				return
-			}
-			http.Error(w, resp, 401)
+		// w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		// username, password, ok := r.BasicAuth()
+		// if !ok {
+		// 	resp, err := unauthorizedResp()
+		// 	if err != nil {
+		// 		logger.Error(err)
+		// 		return
+		// 	}
+		// 	http.Error(w, resp, 401)
+		// 	return
+		// }
+
+		// authorized := false
+		// for u, p := range credentials {
+		// 	if u == username && p == password {
+		// 		authorized = true
+		// 	}
+		// }
+		// if !authorized {
+		// 	resp, err := unauthorizedResp()
+		// 	if err != nil {
+		// 		logger.Error(err)
+		// 		return
+		// 	}
+		// 	http.Error(w, resp, 401)
+		// 	return
+		// }
+
+		//authentication would be user chipertext, nonce and signature to validate chipertext
+		var response CipherResponse
+		ciperText := r.Header.Get("ciphertext")
+		signature := r.Header.Get("signature")
+		nonce := r.Header.Get("nonce")
+		if len(strings.TrimSpace(ciperText)) <= 0 && len(strings.TrimSpace(nonce)) <= 0 && len(strings.TrimSpace(signature)) <= 0 {
+			http.Error(w, "missing headers fields", http.StatusBadRequest)
+			return
+		}
+		input := axillaryInput{Nonce: nonce, Signature: signature}
+		inputbyt, err := json.Marshal(input)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("invalid input %+v", err), http.StatusBadRequest)
+			return
+		}
+		err = doRequest(URL, http.MethodPost, inputbyt, &response)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("authentication failed %+v", err), http.StatusBadRequest)
+			return
+		}
+		if strings.Compare(response.CiperText, ciperText) != 0 {
+			http.Error(w, "failed to match authentication data", http.StatusBadRequest)
 			return
 		}
 
-		authorized := false
-		for u, p := range credentials {
-			if u == username && p == password {
-				authorized = true
-			}
-		}
-		if !authorized {
-			resp, err := unauthorizedResp()
-			if err != nil {
-				logger.Error(err)
-				return
-			}
-			http.Error(w, resp, 401)
-			return
-		}
 		h.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(wrap)
@@ -1200,4 +1240,39 @@ func (api *API) setHeaders(w http.ResponseWriter) {
 	}
 
 	w.Header().Add("Content-Type", "application/json")
+}
+
+func doRequest(URL, method string, body []byte, responseData interface{}) error {
+	fmt.Println(URL)
+	var bData io.Reader
+	if body != nil {
+		bData = bytes.NewReader(body)
+	}
+	req, err := http.NewRequest(method, URL, bData)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("got wrong status from server")
+	}
+	respByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if responseData != nil {
+		err = json.NewDecoder(bytes.NewReader(respByte)).Decode(responseData)
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }

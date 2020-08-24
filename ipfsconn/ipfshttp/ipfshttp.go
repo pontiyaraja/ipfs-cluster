@@ -562,6 +562,7 @@ func (ipfs *Connector) doPostCtx(ctx context.Context, client *http.Client, apiUR
 	}
 
 	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("internal", "true")
 	req = req.WithContext(ctx)
 	res, err := ipfs.client.Do(req)
 	if err != nil {

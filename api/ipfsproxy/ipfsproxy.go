@@ -596,6 +596,9 @@ func (proxy *Server) addHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (proxy *Server) repoStatHandler(w http.ResponseWriter, r *http.Request) {
+	// r.Header.Add("chipertext", "512e699a69aa9967597cac9ecb15dac84ddc845ad942e6942210880641f6957b")
+	// r.Header.Add("signature", "0x763469da3895d488cbb9877b8edf35a1a8defc5a0c6fbb34ce8ada96bae2add66e0c61f0748b3af2662aa47784c7cbfb358927f4bebf7c83eb816095a34906981b")
+	// r.Header.Add("nonce", "1589369320208")
 	proxy.setHeaders(w.Header(), r)
 
 	peers := make([]peer.ID, 0)
