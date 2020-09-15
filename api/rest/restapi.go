@@ -29,7 +29,7 @@ import (
 	"github.com/ipfs/ipfs-cluster/state"
 
 	cid "github.com/ipfs/go-cid"
-	logging "github.com/ipfs/go-log"
+	logging "github.com/ipfs/go-log/v2"
 	gopath "github.com/ipfs/go-path"
 	libp2p "github.com/libp2p/go-libp2p"
 	host "github.com/libp2p/go-libp2p-core/host"
@@ -40,7 +40,6 @@ import (
 	libp2pquic "github.com/libp2p/go-libp2p-quic-transport"
 	secio "github.com/libp2p/go-libp2p-secio"
 	libp2ptls "github.com/libp2p/go-libp2p-tls"
-	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
 
 	handlers "github.com/gorilla/handlers"
@@ -76,7 +75,7 @@ var (
 const autoStatus = -1
 
 // For making a random sharding ID
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+// var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 const URL = "http://138.197.160.170:2048/user/getKey"
 
@@ -95,7 +94,7 @@ type API struct {
 	server *http.Server
 	host   host.Host
 
-	httpListener   net.Listener
+	httpListeners  []net.Listener
 	libp2pListener net.Listener
 
 	shutdownLock sync.Mutex
@@ -201,19 +200,19 @@ func NewAPIWithHost(ctx context.Context, cfg *Config, h host.Host) (*API, error)
 	}
 	api.addRoutes(router)
 
-	// Set up api.httpListener if enabled
+	// Set up api.httpListeners if enabled
 	err = api.setupHTTP()
 	if err != nil {
 		return nil, err
 	}
 
-	// Set up api.libp2pListener if enabled
+	// Set up api.libp2pListeners if enabled
 	err = api.setupLibp2p()
 	if err != nil {
 		return nil, err
 	}
 
-	if api.httpListener == nil && api.libp2pListener == nil {
+	if len(api.httpListeners) == 0 && api.libp2pListener == nil {
 		return nil, ErrNoEndpointsEnabled
 	}
 
@@ -222,39 +221,41 @@ func NewAPIWithHost(ctx context.Context, cfg *Config, h host.Host) (*API, error)
 }
 
 func (api *API) setupHTTP() error {
-	if api.config.HTTPListenAddr == nil {
+	if len(api.config.HTTPListenAddr) == 0 {
 		return nil
 	}
 
-	n, addr, err := manet.DialArgs(api.config.HTTPListenAddr)
-	if err != nil {
-		return err
-	}
+	for _, listenMAddr := range api.config.HTTPListenAddr {
+		n, addr, err := manet.DialArgs(listenMAddr)
+		if err != nil {
+			return err
+		}
 
-	var l net.Listener
-	if api.config.TLS != nil {
-		l, err = tls.Listen(n, addr, api.config.TLS)
-	} else {
-		l, err = net.Listen(n, addr)
+		var l net.Listener
+		if api.config.TLS != nil {
+			l, err = tls.Listen(n, addr, api.config.TLS)
+		} else {
+			l, err = net.Listen(n, addr)
+		}
+		if err != nil {
+			return err
+		}
+		api.httpListeners = append(api.httpListeners, l)
 	}
-	if err != nil {
-		return err
-	}
-	api.httpListener = l
 	return nil
 }
 
 func (api *API) setupLibp2p() error {
 	// Make new host. Override any provided existing one
 	// if we have config for a custom one.
-	if api.config.Libp2pListenAddr != nil {
+	if len(api.config.Libp2pListenAddr) > 0 {
 		// We use a new host context. We will call
 		// Close() on shutdown(). Avoids things like:
 		// https://github.com/ipfs/ipfs-cluster/issues/853
 		h, err := libp2p.New(
 			context.Background(),
 			libp2p.Identity(api.config.PrivateKey),
-			libp2p.ListenAddrs([]ma.Multiaddr{api.config.Libp2pListenAddr}...),
+			libp2p.ListenAddrs(api.config.Libp2pListenAddr...),
 			libp2p.Security(libp2ptls.ID, libp2ptls.New),
 			libp2p.Security(secio.ID, secio.New),
 			libp2p.Transport(libp2pquic.NewTransport),
@@ -278,15 +279,20 @@ func (api *API) setupLibp2p() error {
 	return nil
 }
 
-// HTTPAddress returns the HTTP(s) listening address
+// HTTPAddresses returns the HTTP(s) listening address
 // in host:port format. Useful when configured to start
 // on a random port (0). Returns error when the HTTP endpoint
 // is not enabled.
-func (api *API) HTTPAddress() (string, error) {
-	if api.httpListener == nil {
-		return "", ErrHTTPEndpointNotEnabled
+func (api *API) HTTPAddresses() ([]string, error) {
+	if len(api.httpListeners) == 0 {
+		return nil, ErrHTTPEndpointNotEnabled
 	}
-	return api.httpListener.Addr().String(), nil
+	var addrs []string
+	for _, l := range api.httpListeners {
+		addrs = append(addrs, l.Addr().String())
+	}
+
+	return addrs, nil
 }
 
 // Host returns the libp2p Host used by the API, if any.
@@ -519,28 +525,38 @@ func (api *API) routes() []route {
 }
 
 func (api *API) run(ctx context.Context) {
-	if api.httpListener != nil {
-		api.wg.Add(1)
-		go api.runHTTPServer(ctx)
+	api.wg.Add(len(api.httpListeners))
+	for _, l := range api.httpListeners {
+		go func(l net.Listener) {
+			defer api.wg.Done()
+			api.runHTTPServer(ctx, l)
+		}(l)
 	}
 
 	if api.libp2pListener != nil {
 		api.wg.Add(1)
-		go api.runLibp2pServer(ctx)
+		go func() {
+			defer api.wg.Done()
+			api.runLibp2pServer(ctx)
+		}()
 	}
 }
 
 // runs in goroutine from run()
-func (api *API) runHTTPServer(ctx context.Context) {
-	defer api.wg.Done()
+func (api *API) runHTTPServer(ctx context.Context, l net.Listener) {
 	select {
 	case <-api.rpcReady:
 	case <-api.ctx.Done():
 		return
 	}
 
-	logger.Infof("REST API (HTTP): %s", api.config.HTTPListenAddr)
-	err := api.server.Serve(api.httpListener)
+	maddr, err := manet.FromNetAddr(l.Addr())
+	if err != nil {
+		logger.Error(err)
+	}
+
+	logger.Infof("REST API (HTTP): %s", maddr)
+	err = api.server.Serve(l)
 	if err != nil && !strings.Contains(err.Error(), "closed network connection") {
 		logger.Error(err)
 	}
@@ -548,8 +564,6 @@ func (api *API) runHTTPServer(ctx context.Context) {
 
 // runs in goroutine from run()
 func (api *API) runLibp2pServer(ctx context.Context) {
-	defer api.wg.Done()
-
 	select {
 	case <-api.rpcReady:
 	case <-api.ctx.Done():
@@ -590,9 +604,10 @@ func (api *API) Shutdown(ctx context.Context) error {
 	// Cancel any outstanding ops
 	api.server.SetKeepAlivesEnabled(false)
 
-	if api.httpListener != nil {
-		api.httpListener.Close()
+	for _, l := range api.httpListeners {
+		l.Close()
 	}
+
 	if api.libp2pListener != nil {
 		api.libp2pListener.Close()
 	}
@@ -711,8 +726,6 @@ func (api *API) addHandler(w http.ResponseWriter, r *http.Request) {
 		w,
 		nil,
 	)
-
-	return
 }
 
 func (api *API) peerListHandler(w http.ResponseWriter, r *http.Request) {
@@ -740,7 +753,7 @@ func (api *API) peerAddHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pid, err := peer.IDB58Decode(addInfo.PeerID)
+	pid, err := peer.Decode(addInfo.PeerID)
 	if err != nil {
 		api.sendResponse(w, http.StatusBadRequest, errors.New("error decoding peer_id"), nil)
 		return
@@ -990,7 +1003,7 @@ func (api *API) statusHandler(w http.ResponseWriter, r *http.Request) {
 				pin.Cid,
 				&pinInfo,
 			)
-			api.sendResponse(w, autoStatus, err, pinInfoToGlobal(&pinInfo))
+			api.sendResponse(w, autoStatus, err, pinInfo.ToGlobal())
 		} else {
 			var pinInfo types.GlobalPinInfo
 			err := api.rpcClient.CallContext(
@@ -1049,7 +1062,7 @@ func (api *API) recoverHandler(w http.ResponseWriter, r *http.Request) {
 				pin.Cid,
 				&pinInfo,
 			)
-			api.sendResponse(w, autoStatus, err, pinInfoToGlobal(&pinInfo))
+			api.sendResponse(w, autoStatus, err, pinInfo.ToGlobal())
 		} else {
 			var pinInfo types.GlobalPinInfo
 			err := api.rpcClient.CallContext(
@@ -1099,7 +1112,7 @@ func (api *API) repoGCHandler(w http.ResponseWriter, r *http.Request) {
 func repoGCToGlobal(r *types.RepoGC) types.GlobalRepoGC {
 	return types.GlobalRepoGC{
 		PeerMap: map[string]*types.RepoGC{
-			peer.IDB58Encode(r.Peer): r,
+			peer.Encode(r.Peer): r,
 		},
 	}
 }
@@ -1149,7 +1162,7 @@ func (api *API) parseCidOrError(w http.ResponseWriter, r *http.Request) *types.P
 func (api *API) parsePidOrError(w http.ResponseWriter, r *http.Request) peer.ID {
 	vars := mux.Vars(r)
 	idStr := vars["peer"]
-	pid, err := peer.IDB58Decode(idStr)
+	pid, err := peer.Decode(idStr)
 	if err != nil {
 		api.sendResponse(w, http.StatusBadRequest, errors.New("error decoding Peer ID: "+err.Error()), nil)
 		return ""
@@ -1157,19 +1170,10 @@ func (api *API) parsePidOrError(w http.ResponseWriter, r *http.Request) peer.ID 
 	return pid
 }
 
-func pinInfoToGlobal(pInfo *types.PinInfo) *types.GlobalPinInfo {
-	return &types.GlobalPinInfo{
-		Cid: pInfo.Cid,
-		PeerMap: map[string]*types.PinInfo{
-			peer.IDB58Encode(pInfo.Peer): pInfo,
-		},
-	}
-}
-
 func pinInfosToGlobal(pInfos []*types.PinInfo) []*types.GlobalPinInfo {
-	gPInfos := make([]*types.GlobalPinInfo, len(pInfos), len(pInfos))
+	gPInfos := make([]*types.GlobalPinInfo, len(pInfos))
 	for i, p := range pInfos {
-		gPInfos[i] = pinInfoToGlobal(p)
+		gPInfos[i] = p.ToGlobal()
 	}
 	return gPInfos
 }

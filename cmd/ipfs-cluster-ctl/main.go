@@ -18,11 +18,10 @@ import (
 	"github.com/ipfs/ipfs-cluster/cmdutils"
 
 	cid "github.com/ipfs/go-cid"
-	logging "github.com/ipfs/go-log"
+	logging "github.com/ipfs/go-log/v2"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 
-	"contrib.go.opencensus.io/exporter/jaeger"
 	uuid "github.com/google/uuid"
 	cli "github.com/urfave/cli"
 )
@@ -31,7 +30,7 @@ const programName = `ipfs-cluster-ctl`
 
 // Version is the cluster-ctl tool version. It should match
 // the IPFS cluster's version
-const Version = "0.12.0"
+const Version = "0.13.0"
 
 // Default location for the configurations and data
 var (
@@ -50,15 +49,11 @@ var (
 var (
 	defaultHost          = "/ip4/0.0.0.0/tcp/9094"
 	defaultTimeout       = 0
-	defaultUsername      = ""
-	defaultPassword      = ""
 	defaultWaitCheckFreq = time.Second
 	defaultAddParams     = api.DefaultAddParams()
 )
 
 var logger = logging.Logger("cluster-ctl")
-
-var tracer *jaeger.Exporter
 
 var globalClient client.Client
 
@@ -86,9 +81,9 @@ https://github.com/ipfs/ipfs-cluster.
 	programName,
 	defaultHost)
 
-type peerAddBody struct {
-	Addr string `json:"peer_multiaddress"`
-}
+// type peerAddBody struct {
+// 	Addr string `json:"peer_multiaddress"`
+// }
 
 func out(m string, a ...interface{}) {
 	fmt.Fprintf(os.Stderr, m, a...)
@@ -159,6 +154,7 @@ requires authorization. implies --https, which you can disable with --force-http
 
 		if c.Bool("debug") {
 			logging.SetLogLevel("cluster-ctl", "debug")
+			logging.SetLogLevel("apitypes", "debug")
 			cfg.LogLevel = "debug"
 			logger.Debug("debug level enabled")
 		}
@@ -176,7 +172,7 @@ requires authorization. implies --https, which you can disable with --force-http
 		cfg.Timeout = time.Duration(c.Int("timeout")) * time.Second
 
 		if client.IsPeerAddress(cfg.APIAddr) && c.Bool("https") {
-			logger.Warning("Using libp2p-http. SSL flags will be ignored")
+			logger.Warn("Using libp2p-http. SSL flags will be ignored")
 		}
 
 		cfg.SSL = c.Bool("https")
@@ -185,7 +181,7 @@ requires authorization. implies --https, which you can disable with --force-http
 		cfg.Username = user
 		cfg.Password = pass
 		if user != "" && !cfg.SSL && !c.Bool("force-http") {
-			logger.Warning("SSL automatically enabled with basic auth credentials. Set \"force-http\" to disable")
+			logger.Warn("SSL automatically enabled with basic auth credentials. Set \"force-http\" to disable")
 			cfg.SSL = true
 		}
 
@@ -283,7 +279,7 @@ cluster peers.
 					Flags:     []cli.Flag{},
 					Action: func(c *cli.Context) error {
 						pid := c.Args().First()
-						p, err := peer.IDB58Decode(pid)
+						p, err := peer.Decode(pid)
 						checkErr("parsing peer ID", err)
 						cerr := globalClient.PeerRm(ctx, p)
 						formatResponse(c, nil, cerr)
@@ -443,7 +439,7 @@ content.
 				}
 
 				// Read arguments (paths)
-				paths := make([]string, c.NArg(), c.NArg())
+				paths := make([]string, c.NArg())
 				for i, path := range c.Args() {
 					paths[i] = path
 				}
@@ -589,6 +585,11 @@ would stil be respected.
 							Usage: "Sets a name for this pin",
 						},
 						cli.StringFlag{
+							Name:  "mode",
+							Value: "recursive",
+							Usage: "Select a way to pin: recursive or direct",
+						},
+						cli.StringFlag{
 							Name:  "expire-in",
 							Usage: "Duration after which pin should be unpinned automatically",
 						},
@@ -642,6 +643,7 @@ would stil be respected.
 							ReplicationFactorMin: rplMin,
 							ReplicationFactorMax: rplMax,
 							Name:                 c.String("name"),
+							Mode:                 api.PinModeFromString(c.String("mode")),
 							UserAllocations:      userAllocs,
 							ExpireAt:             expireAt,
 							Metadata:             parseMetadata(c.StringSlice("metadata")),
@@ -773,10 +775,10 @@ the cluster. For IPFS-status information about the pins, use "status".
 
 The filter only takes effect when listing all pins. The possible values are:
   - all
-  - pin
-  - meta-pin
-  - clusterdag-pin
-  - shard-pin
+  - pin (normal pins, recursive or direct)
+  - meta-pin (sharded pins)
+  - clusterdag-pin (sharding-dag root pins)
+  - shard-pin (individual shard pins)
 `,
 					ArgsUsage: "[CID]",
 					Flags: []cli.Flag{
@@ -1015,14 +1017,6 @@ deamon, otherwise on all IPFS daemons.
 	}
 
 	app.Run(os.Args)
-}
-
-func parseFlag(t int) cli.IntFlag {
-	return cli.IntFlag{
-		Name:   "parseAs",
-		Value:  t,
-		Hidden: true,
-	}
 }
 
 func localFlag() cli.BoolFlag {
